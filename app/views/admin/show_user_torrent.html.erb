@@ -1,0 +1,24 @@
+<h1>Torrents for User <%= @user.first_name %> </h1>
+
+<table id="torrent_list">
+  <tr>
+    <th>Torrent name</th>
+  </tr>
+
+<% for torrent in @torrents %>
+  <tr>
+  	<td><%=h torrent.name %></td>
+		<td> <%= link_to 'delete', :controller => 'admin', :action => 'delete_torrent', :id => torrent.id %></td>
+		<td><%= link_to 'download', :controller => 'admin', :action => 'download_torrent', :id => torrent.id, :uid => @user.id %> </td>
+		<td>
+		<% if(@t_status[torrent.id.to_s] == 100)%>
+			<%= link_to 'retrieve', :controller => 'admin', :action => 'retrieve_torrent', :id => torrent.id %>
+		<% end %>
+		</td>
+		<td>Percent Done: <%= progress_bar("progress" + torrent.id.to_s, @t_status[torrent.id.to_s] / 100.0, true, true) %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+<%= link_to 'Add torrent', :controller => 'admin', :action => 'new_user_torrent', :uid => @user.id %>

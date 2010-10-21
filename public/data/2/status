@@ -1,0 +1,46 @@
+NAME
+  Id: 6
+  Name: VisualProgrammer.rar
+  Hash: 70847a24d3387bbf5230d18ab99848df829b6c63
+
+TRANSFER
+  State: Idle
+  Location: /var/rails/torrent_dam/public/data/downloading
+  Percent Done: 0.00%
+  ETA: 0 seconds
+  Download Speed: 0.0 KB/s
+  Upload Speed: 0.0 KB/s
+  Have: None (None verified)
+  Total size: 83.9 KB (83.9 KB wanted)
+  Downloaded: None
+  Uploaded: None
+  Ratio: None
+  Corrupt DL: None
+  Peers: connected to 0, uploading to 0, downloading from 0
+  Web Seeds: downloading from 3 of 3 web seeds
+
+HISTORY
+  Date added:      Thu Sep 30 12:38:30 2010
+  Date started:    Thu Sep 30 12:38:30 2010
+
+TRACKER
+  Latest announce: Thu Sep 30 12:38:30 2010
+  Announce URL: http://tracker.openbittorrent.com:80/announce
+  Announce response: Announce failed: tracker did not respond.
+  Next announce:   Thu Sep 30 12:40:37 2010
+  Latest scrape:   Thu Sep 30 12:38:38 2010
+  Scrape response: Scrape failed: tracker did not respond.
+  Next scrape:     Thu Sep 30 12:39:15 2010
+  Tracker knows of -1 seeders and -1 leechers
+  Tracker has seen -1 clients complete this torrent
+
+ORIGINS
+  Date created: Fri Dec 26 14:21:44 2008
+  Public torrent: Yes
+  Comment: Torrent downloaded from http://thepiratebay.org
+  Creator: uTorrent/1810
+  Piece Count: 2
+  Piece Size: 65536
+
+PIECES
+  00 

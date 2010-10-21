@@ -1,0 +1,8 @@
+<h1>Add A New Torrent File For User <%= @user.first_name %> </h1>
+<% form_tag "new_user_torrent", :multipart => true do %>
+	<%= error_messages_for :torrent %>
+	<p> <label for="new_user_torrent"> Select Torrent</label>:
+	<%= file_field(:new, :torrent) %> </p>
+	<%= submit_tag "Upload" %>
+<% end %>
+<%= link_to 'Cancel', :back %>

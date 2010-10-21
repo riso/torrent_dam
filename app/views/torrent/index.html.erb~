@@ -1,0 +1,25 @@
+<h1>Welcome to your Torrent Dam home, <%= @user.first_name %></h1>
+<table id="torrent_list">
+  <tr>
+    <th>Torrent Name</th>
+  </tr>
+
+<% for torrent in @torrents %>
+
+<%= periodically_call_remote(:url => {:controller => "torrent", :action => "index"}, :update => "progress" + torrent.id.to_s) %>
+  <tr>
+    <td><%=h torrent.name %></td>
+	<td> <%= link_to 'delete', torrent, :confirm => 'Are you sure?', :method => :delete %></td>
+	<td><%= link_to 'download', :controller => 'torrent', :action => 'download', :id => torrent.id %> </td>
+	<td>	
+	<% if(@t_status[torrent.id.to_s] == 100)%>
+		<%= link_to 'retrieve', :controller => 'torrent', :action => 'retrieve', :id => torrent.id %>
+	<% end %>
+	</td>
+	<td>Percent Done: <%= progress_bar("progress" + torrent.id.to_s, @t_status[torrent.id.to_s] / 100.0, true, true) %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+<%= link_to 'Add torrent', new_torrent_path %>

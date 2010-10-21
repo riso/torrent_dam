@@ -1,0 +1,3 @@
+<h1>Welcome home, commander.</h1>
+<%= link_to 'manage users', :controller => 'admin', :action => 'users' %>
+<%= link_to 'manage torrents', :controller => 'admin', :action => 'show_torrents' %>

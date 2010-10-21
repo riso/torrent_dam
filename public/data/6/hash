@@ -1,0 +1,15 @@
+Transmission 1.77 (9868) - http://www.transmissionbt.com/
+hash:	70847a24d3387bbf5230d18ab99848df829b6c63
+name:	VisualProgrammer.rar
+
+tracker tier #1:
+	announce:	http://tracker.openbittorrent.com:80/announce
+
+tracker tier #2:
+	announce:	http://tracker.publicbt.com:80/announce
+size:	85874 (1 * 65536 + 20338)
+comment:	Torrent downloaded from http://thepiratebay.org
+creator:	uTorrent/1810
+file(s):
+	VisualProgrammer.rar (85874)
+

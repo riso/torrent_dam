@@ -1,0 +1,25 @@
+<h1>Manage Torrent Dam users.</h1>
+
+<table id="user_list">
+  <tr>
+    <th>ID</th>
+		<th>E-mail</th>
+		<th>First Name</th>
+		<th>Last Name</th>
+		<th>Admin</th>
+  </tr>
+
+<% for u in @users %>
+  <tr>
+		<td><%=h u.id %></td>
+		<td><%=h u.email %></td>
+		<td><%=h u.first_name %></td>
+    <td><%=h u.last_name %></td>
+		<td><%=h u.admin %></td>
+		<td><%= link_to 'Delete User', :action => 'delete_user', :id => u.id %></td>
+		<td><%= link_to 'Show User\'s Torrents', :action => 'show_user_torrent', :id => u.id %></td>
+  </tr>
+<% end %>
+</table>
+<br />
+<%= link_to 'Add User', :action => 'new_user' %>
