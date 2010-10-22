@@ -1,4 +1,5 @@
-require 'transmission-client'
+require 'net/http'
+require 'uri'
 
 class Torrent < ActiveRecord::Base
 	validates_presence_of :name, :user_id 
@@ -45,15 +46,18 @@ end
 	end
 	
 	def start_download(user_id, torrent)
-		 EventMachine.run_block b 
-			b = {
-			c = Transmission::Client.new
-			c.add_torrent_by_file("/var/rails/torrent_dam/public/data/" + user_id.to_s + "/" + sanitize_filename(torrent))
-			}
-		#p = fork{
-			#exec("transmission-remote -a /var/rails/torrent_dam/public/data/" + user_id.to_s + "/" + sanitize_filename(torrent))
-		#}
-		#Process.detach p
+		filename = '/var/rails/torrent_dam/public/data/' + user_id.to_s + '/' + sanitize_filename(torrent)
+		uri = URI.parse 'http://localhost:9091/transmission/rpc'
+		Net::HTTP.new(uri.host, uri.port).start { |http|
+			response = http.post '/transmission/rpc', {'method' => 'torrent-add', 'arguments' => {'filename' => filename}}.to_json
+			if reponse.code == '409'
+					response = http.post '/transmission/rpc', {'method' => 'torrent-add', 'arguments' => {'filename' => filename}}.to_json, response		
+			end
+			if response.code == '200'
+				json_resp = JSON.parse response.body
+				transmission_id = json_resp['arguments']['torrent-added']['id']
+			end
+		}
 	end
 
 	def check_status(user_id, t_hash)
