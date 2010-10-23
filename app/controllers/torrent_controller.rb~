@@ -29,7 +29,7 @@ class TorrentController < ApplicationController
   end
   
   def destroy
-		if destroy_torrent params[:id]
+		if destroy_torrent
 			redirect_to :action => 'index'
 		else
 			flash[:notice] = 'Error Deleting Torrent'
@@ -37,16 +37,18 @@ class TorrentController < ApplicationController
   end
   
   def download
-		if !dl_torrent params[:id], session[:user_id]
+		id = dl_torrent params[:id], session[:user_id]
+		if id == -1
 			flash[:notice] = 'Error Downloading Torrent'
 		else 
 			flash[:notice] = 'Download Started' 
+			@torrent.update_attributes({:transmission_id => id})
 		end
 		redirect_to :action => 'index'
   end
 
   def retrieve
-		if !ret_torrent params[:id], session[:user_id]
+		if !ret_torrent params[:id]
 				flash[:notice] = 'Torrent Is Still Downloading'
 				redirect_to :action => 'index'	
 		end

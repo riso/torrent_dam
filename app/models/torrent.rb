@@ -37,12 +37,20 @@ class Torrent < ActiveRecord::Base
   end
 end
 	
-	def del_torrent(t_hash)
-		p = fork { 
-			exec("transmission-remote -t" + t_hash + " --remove-and-delete")
+	def del_torrent
+		uri = URI.parse 'http://localhost:9091/transmission/rpc'
+		Net::HTTP.new(uri.host, uri.port).start { |http|
+			response = http.post '/transmission/rpc', {'method' => 'torrent-remove', 'arguments' =>  {'ids' => [self.transmission_id], 'delete-local-data' => true }}.to_json
+			if response.code == '401'
+				return -1
+			end
+			if response.code == '409'
+					response = http.post '/transmission/rpc', {'method' => 'torrent-remove', 'arguments' => {'ids' => [self.transmission_id], 'delete-local-data' => true }}.to_json, response		
+			end
+			if response.code == '200'
+				File.delete("/var/rails/torrent_dam/public/data/completed/" + self.t_hash + ".zip") if File.exist?("/var/rails/torrent_dam/public/data/completed/" + self.t_hash + ".zip")
+			end
 		}
-		Process.detach p
-		File.delete("/var/rails/torrent_dam/public/data/completed/" + t_hash + ".zip") if File.exist?("/var/rails/torrent_dam/public/data/completed/" + t_hash + ".zip")
 	end
 	
 	def start_download(user_id, torrent)
@@ -50,11 +58,17 @@ end
 		uri = URI.parse 'http://localhost:9091/transmission/rpc'
 		Net::HTTP.new(uri.host, uri.port).start { |http|
 			response = http.post '/transmission/rpc', {'method' => 'torrent-add', 'arguments' => {'filename' => filename}}.to_json
+			if response.code == '401'
+				return -1
+			end
 			if response.code == '409'
 					response = http.post '/transmission/rpc', {'method' => 'torrent-add', 'arguments' => {'filename' => filename}}.to_json, response		
 			end
 			if response.code == '200'
 				json_resp = JSON.parse response.body
+				if json_resp['arguments']['torrent-added'].nil?
+					return -1
+				end
 				transmission_id = json_resp['arguments']['torrent-added']['id']
 			end
 		}

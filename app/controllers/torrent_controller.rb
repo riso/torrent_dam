@@ -37,10 +37,12 @@ class TorrentController < ApplicationController
   end
   
   def download
-		if !dl_torrent params[:id], session[:user_id]
+		id = dl_torrent params[:id], session[:user_id]
+		if id == -1
 			flash[:notice] = 'Error Downloading Torrent'
 		else 
 			flash[:notice] = 'Download Started' 
+			@torrent.update_attributes({:transmission_id => id})
 		end
 		redirect_to :action => 'index'
   end

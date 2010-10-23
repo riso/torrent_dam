@@ -55,7 +55,7 @@ class ApplicationController < ActionController::Base
 		t_hash = @torrent.t_hash
 		@t = Torrent.find :all, :conditions => ["t_hash = ?", t_hash]
 		if (@t.count == 1)
-			@torrent.del_torrent @torrent.t_hash
+			@torrent.del_torrent
 		end
 		return @torrent.destroy
   end
