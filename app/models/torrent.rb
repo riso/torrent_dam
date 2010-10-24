@@ -14,28 +14,39 @@ class Torrent < ActiveRecord::Base
 		f = File.open(path, "wb")
 		f.write(upload.read)
 		f.close
-		p = fork {
-			exec("transmissioncli -i " + path + ">/var/rails/torrent_dam/public/data/" + user_id + "/hash")
-		}
-		Process.waitpid p
-		f = File.open("/var/rails/torrent_dam/public/data/" + user_id + "/hash", "r")
-		while (line = f.gets)
-			if line.include? "hash:"
-				return line[6..line.length].chomp
+		filename = '/var/rails/torrent_dam/public/data/' + user_id.to_s + '/' + name
+		uri = URI.parse 'http://localhost:9091/transmission/rpc'
+		Net::HTTP.new(uri.host, uri.port).start { |http|
+			response = http.post '/transmission/rpc', {'method' => 'torrent-add', 'arguments' => {'filename' => filename}}.to_json
+			if response.code == '401'
+				return -1
 			end
-		end
+			if response.code == '409'
+					response = http.post '/transmission/rpc', {'method' => 'torrent-add', 'arguments' => {'filename' => filename}}.to_json, response		
+			end
+			if response.code == '200'
+				json_resp = JSON.parse response.body
+				if json_resp['result'] == 'duplicate torrent'
+
+				end
+				if json_resp['arguments']['torrent-added'].nil?
+					return -1
+				end
+				transmission_id = json_resp['arguments']['torrent-added']['id']
+			end
+		}
 	end
 
 	def sanitize_filename(filename)
-  returning filename.strip do |name|
-    # NOTE: File.basename doesn't work right with Windows paths on Unix
-    # get only the filename, not the whole path
-    name.gsub! /^.*(\\|\/)/, ''
-    # Finally, replace all non alphanumeric, underscore
-    # or periods with underscore
-    name.gsub! /[^\w\.\-]/, '_'
-  end
-end
+		returning filename.strip do |name|
+			# NOTE: File.basename doesn't work right with Windows paths on Unix
+			# get only the filename, not the whole path
+			name.gsub! /^.*(\\|\/)/, ''
+			# Finally, replace all non alphanumeric, underscore
+			# or periods with underscore
+			name.gsub! /[^\w\.\-]/, '_'
+		end
+	end
 	
 	def del_torrent
 		uri = URI.parse 'http://localhost:9091/transmission/rpc'
@@ -74,30 +85,33 @@ end
 		}
 	end
 
-	def check_status(user_id, t_hash)
-		if File.exist?("/var/rails/torrent_dam/public/data/completed/" + t_hash + ".zip")
+	def check_status
+		if File.exist?("/var/rails/torrent_dam/public/data/completed/" + self.transmission_id.to_s + ".zip")
 			return 100
 		else
-			p = fork {
-				exec("transmission-remote -t" + t_hash + " -i >/var/rails/torrent_dam/public/data/" + user_id + "/status")
+			uri = URI.parse 'http://localhost:9091/transmission/rpc'
+			Net::HTTP.new(uri.host, uri.port).start { |http|
+				response = http.post '/transmission/rpc', {'method' => 'torrent-get', 'arguments' => {'ids' => [self.transmission_id], 'fields' => ['percentDone']}}.to_json
+				if response.code == '401'
+					return -1
+				end
+				if response.code == '409'
+						response = http.post '/transmission/rpc', {'method' => 'torrent-get', 'arguments' => {'ids' => [self.transmission_id], 'fields' => ['percentDone']}}.to_json, response		
+				end
+				if response.code == '200'
+					@res = JSON.parse response.body
+				else 
+					return -1
+				end
 			}
-			Process.waitpid p
-			f = File.open("/var/rails/torrent_dam/public/data/" + user_id + "/status", "r")
-			while (line = f.gets)
-				if line.include? "Name:"
-					name = line[8..line.length].chomp
-				end
-				if line.include? "Percent Done:"
-					status = line[16..line.length].chomp.to_i
-					if (status == 100 && !File.exist?("/var/rails/torrent_dam/public/data/completed/" + t_hash + ".zip"))
-						p = fork {
-							exec("transmission-remote -t" + t_hash + " -S; cd /var/rails/torrent_dam/public/data/downloading; zip -r /var/rails/torrent_dam/public/data/completed/" + t_hash +".zip ./" + name + "; transmission-remote -t" + t_hash + " --remove-and-delete")
+			status = @res['arguments']['torrents'][0]['percentDone']
+			if (status == 100 && !File.exist?("/var/rails/torrent_dam/public/data/completed/" + self.transmission_id.to_s + ".zip"))
+				p = fork {
+							exec("cd /var/rails/torrent_dam/public/data/downloading; zip -r /var/rails/torrent_dam/public/data/completed/" + self.transmission_id.to_s + ".zip ./" + name)
 						}
-						Process.detach p
-					end	
-					return status * 0.95
-				end
+				Process.detach p
 			end
+			return status * 95
 		end
 		-1
 	end

@@ -52,8 +52,8 @@ class ApplicationController < ActionController::Base
 
 	def destroy_torrent(t_id)
 		@torrent = Torrent.find t_id
-		t_hash = @torrent.t_hash
-		@t = Torrent.find :all, :conditions => ["t_hash = ?", t_hash]
+		transmission_id = @torrent.transmission_id
+		@t = Torrent.find :all, :conditions => ["transmission_id = ?", transmission_id]
 		if (@t.count == 1)
 			@torrent.del_torrent
 		end

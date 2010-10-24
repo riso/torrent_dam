@@ -7,7 +7,7 @@ class TorrentController < ApplicationController
 		@torrents = @user.torrents
 		@t_status = Hash.new
 		for t in @torrents
-			@t_status[t.id.to_s] = t.check_status @user.id.to_s, t.t_hash		
+			@t_status[t.id.to_s] = t.check_status		
 		end
 	else 
 		redirect_to :controller => 'user', :action => 'login'
@@ -17,13 +17,13 @@ class TorrentController < ApplicationController
   def new
 		@torrent = @user.torrents.build
 		if request.post?
-			hash = @torrent.store(params[:new][:torrent], @user.id.to_s)
-			@torrent = @user.torrents.build(:name => params[:new][:torrent].original_filename.to_s, :t_hash => hash)
+			transmission_id = @torrent.store(params[:new][:torrent], @user.id.to_s)
+			@torrent = @user.torrents.build :name => params[:new][:torrent].original_filename.to_s, :transmission_id => transmission_id
 			if @torrent.save
-				flash[:notice]='torrent uploaded correctly'
+				flash[:notice]='Torrent Uploaded Correctly'
 				redirect_to :action => 'index'
 			else
-				flash[:notice]='error uploading torrent'
+				flash[:notice]='Error Uploading Torrent'
 			end
 		end
   end
