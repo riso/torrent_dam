@@ -95,7 +95,7 @@ class AdminController < ApplicationController
 		@torrents = Torrent.all
 		@t_status = Hash.new
 		for t in @torrents
-			@t_status[t.id.to_s] = t.check_status t.user_id.to_s, t.t_hash		
+			@t_status[t.id.to_s] = t.check_status
 		end
 	end
 
